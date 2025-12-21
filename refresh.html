@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Smart Factory - Refreshing...</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h1 { margin-bottom: 10px; }
+        p { opacity: 0.8; margin-bottom: 30px; }
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+    <h1>🏭 Smart Factory</h1>
+    <p>Cargando la aplicación más reciente...</p>
+    
+    <a href="https://artmej.github.io/smart-factory-dashboard/" class="btn">🔄 Ir al Dashboard</a>
+    <button onclick="clearCacheAndReload()" class="btn">🧹 Limpiar Cache</button>
+    
+    <script>
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'https://artmej.github.io/smart-factory-dashboard/';
+        }, 3000);
+        
+        async function clearCacheAndReload() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(name => caches.delete(name))
+                );
+                console.log('✅ Cache cleared');
+            }
+            
+            // Unregister service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(
+                    registrations.map(reg => reg.unregister())
+                );
+                console.log('✅ Service workers cleared');
+            }
+            
+            // Force reload
+            window.location.href = 'https://artmej.github.io/smart-factory-dashboard/?v=' + Date.now();
+        }
+        
+        // Clear cache on load
+        window.addEventListener('load', () => {
+            clearCacheAndReload();
+        });
+    </script>
+</body>
+</html>

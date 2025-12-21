@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-factory-v1.2';
+const CACHE_NAME = 'smart-factory-v2.0';
 const urlsToCache = [
   '/',
   '/index.html',
