@@ -288,12 +288,13 @@
 
         const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
-        // 🚀 Initialize Dashboard - Simplified Logic
+        // 🚀 Initialize Dashboard - Simplified Logic with Debug
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🏭 Initializing Smart Factory 3D Dashboard...');
             
             // Only check localStorage - no MSAL interaction
             const authData = localStorage.getItem('smartfactory_auth');
+            console.log('📋 Auth data from localStorage:', authData);
             
             if (!authData) {
                 console.log('❌ No auth data found, redirecting to login...');
@@ -303,19 +304,40 @@
             
             try {
                 const auth = JSON.parse(authData);
+                console.log('📊 Parsed auth object:', auth);
+                
                 const loginTime = new Date(auth.loginTime);
                 const now = new Date();
+                console.log('⏰ Login time:', loginTime, 'Current time:', now);
                 
                 // Check if auth is valid and recent (24 hours)
-                if (!auth.authenticated || !auth.user || !auth.user.endsWith('@microsoft.com')) {
-                    console.log('❌ Invalid auth data, redirecting to login...');
+                if (!auth.authenticated) {
+                    console.log('❌ Not authenticated, auth.authenticated:', auth.authenticated);
+                    localStorage.removeItem('smartfactory_auth');
+                    window.location.href = '/smart-factory-dashboard/login.html';
+                    return;
+                }
+                
+                if (!auth.user) {
+                    console.log('❌ No user field, auth.user:', auth.user);
+                    localStorage.removeItem('smartfactory_auth');
+                    window.location.href = '/smart-factory-dashboard/login.html';
+                    return;
+                }
+                
+                if (!auth.user.endsWith('@microsoft.com')) {
+                    console.log('❌ Invalid domain, auth.user:', auth.user);
                     localStorage.removeItem('smartfactory_auth');
                     window.location.href = '/smart-factory-dashboard/login.html';
                     return;
                 }
                 
                 // Check if token is expired (24 hours)
-                if (now - loginTime > 24 * 60 * 60 * 1000) {
+                const timeDiff = now - loginTime;
+                const hoursOld = timeDiff / (1000 * 60 * 60);
+                console.log('⏱️ Auth is', hoursOld.toFixed(2), 'hours old');
+                
+                if (timeDiff > 24 * 60 * 60 * 1000) {
                     console.log('⏰ Auth expired, redirecting to login...');
                     localStorage.removeItem('smartfactory_auth');
                     window.location.href = '/smart-factory-dashboard/login.html';
