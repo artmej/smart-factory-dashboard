@@ -294,8 +294,39 @@
             signInBtn.addEventListener('click', signIn);
         }
 
-        // Initialize
-        checkAuthStatus();
+        // Initialize immediately
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Login page loaded - checking auth status...');
+            
+            // Check localStorage first for existing auth
+            const authData = localStorage.getItem('smartfactory_auth');
+            if (authData) {
+                try {
+                    const auth = JSON.parse(authData);
+                    const loginTime = new Date(auth.loginTime);
+                    const now = new Date();
+                    
+                    // Check if token is less than 24 hours old
+                    if (now - loginTime < 24 * 60 * 60 * 1000) {
+                        console.log('✅ Valid auth found, redirecting to dashboard...');
+                        showStatus(`Welcome back ${auth.name}!`, 'success');
+                        setTimeout(() => {
+                            window.location.href = '/smart-factory-dashboard/dashboard.html';
+                        }, 1500);
+                        return;
+                    } else {
+                        console.log('⏰ Auth token expired, clearing...');
+                        localStorage.removeItem('smartfactory_auth');
+                    }
+                } catch (e) {
+                    console.log('❌ Invalid auth data, clearing...');
+                    localStorage.removeItem('smartfactory_auth');
+                }
+            }
+            
+            // Initialize MSAL for fresh login
+            await checkAuthStatus();
+        });
         
         // Clear any previous auth errors for testing
         localStorage.removeItem('msal.error');
