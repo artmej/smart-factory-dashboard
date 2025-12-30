@@ -348,12 +348,22 @@
                 console.log('✅ Valid authentication found:', auth.user);
                 document.getElementById('user-name').textContent = auth.user;
                 
-                // Initialize 3D Factory
-                window.factory3D = new SmartFactory3D();
-                console.log('🎉 Dashboard initialized successfully!');
+                // Initialize 3D Factory with error handling
+                try {
+                    console.log('🚀 Starting SmartFactory3D initialization...');
+                    window.factory3D = new SmartFactory3D();
+                    console.log('🎉 SmartFactory3D created successfully!');
+                    console.log('🎉 Dashboard initialized successfully!');
+                } catch (factory3dError) {
+                    console.error('❌ SmartFactory3D initialization error:', factory3dError);
+                    console.error('❌ Error stack:', factory3dError.stack);
+                    // Don't redirect on 3D error, just log it
+                    alert('Error initializing 3D factory: ' + factory3dError.message);
+                }
                 
             } catch (error) {
                 console.error('❌ Error parsing auth data:', error);
+                console.error('❌ Error stack:', error.stack);
                 localStorage.removeItem('smartfactory_auth');
                 window.location.href = '/smart-factory-dashboard/login.html';
             }
