@@ -278,7 +278,7 @@
             auth: {
                 clientId: "982a060b-6968-4038-860c-68925782906d",
                 authority: "https://login.microsoftonline.com/fdpo.onmicrosoft.com",
-                redirectUri: "https://artmej.github.io/smart-factory-dashboard/dashboard.html"
+                redirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
             },
             cache: {
                 cacheLocation: "sessionStorage",
@@ -293,11 +293,26 @@
             console.log('🏭 Initializing Smart Factory 3D Dashboard...');
             
             try {
-                // Handle redirect result from login
-                const tokenResponse = await myMSALObj.handleRedirectPromise();
-                console.log('Token response:', tokenResponse);
+                // Check localStorage first (set by login.html)
+                const authData = localStorage.getItem('smartfactory_auth');
+                let account = null;
                 
-                // Get current account
+                if (authData) {
+                    const auth = JSON.parse(authData);
+                    if (auth.authenticated && auth.user.endsWith('@microsoft.com')) {
+                        // Update UI with user info from localStorage
+                        document.getElementById('user-name').textContent = auth.user;
+                        console.log('✅ Using cached authentication:', auth.user);
+                        
+                        // Initialize 3D Factory
+                        window.factory3D = new SmartFactory3D();
+                        console.log('🎉 Dashboard initialized successfully!');
+                        return;
+                    }
+                }
+                
+                // Fallback: check MSAL accounts
+                await myMSALObj.handleRedirectPromise();
                 const currentAccounts = myMSALObj.getAllAccounts();
                 console.log('Current accounts:', currentAccounts);
                 
@@ -307,7 +322,7 @@
                     return;
                 }
                 
-                const account = currentAccounts[0];
+                account = currentAccounts[0];
                 console.log('✅ Authenticated user:', account);
                 
                 // Validate @microsoft.com domain
@@ -334,6 +349,7 @@
         // 🚪 Logout function
         function logout() {
             console.log('🚪 Logging out...');
+            localStorage.removeItem('smartfactory_auth');
             myMSALObj.logoutRedirect({
                 postLogoutRedirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
             });
