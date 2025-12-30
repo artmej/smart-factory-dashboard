@@ -303,7 +303,7 @@
                 
                 if (currentAccounts.length === 0) {
                     console.log('❌ No authenticated user found, redirecting to login...');
-                    window.location.href = '/login.html';
+                    window.location.href = '/smart-factory-dashboard/login.html';
                     return;
                 }
                 
@@ -327,7 +327,7 @@
                 
             } catch (error) {
                 console.error('❌ Authentication error:', error);
-                window.location.href = '/login.html';
+                window.location.href = '/smart-factory-dashboard/login.html';
             }
         });
 

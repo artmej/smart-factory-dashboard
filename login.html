@@ -253,7 +253,7 @@
                     }));
                     
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = '/smart-factory-dashboard/dashboard.html';
                     }, 1500);
                 }
             } catch (error) {
@@ -275,7 +275,7 @@
                     if (now - loginTime < 24 * 60 * 60 * 1000) {
                         showStatus(`Welcome back ${auth.name}!`, 'success');
                         setTimeout(() => {
-                            window.location.href = 'dashboard.html';
+                            window.location.href = '/smart-factory-dashboard/dashboard.html';
                         }, 1000);
                         return;
                     }
