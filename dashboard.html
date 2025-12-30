@@ -288,71 +288,60 @@
 
         const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
-        // 🚀 Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', async function() {
+        // 🚀 Initialize Dashboard - Simplified Logic
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('🏭 Initializing Smart Factory 3D Dashboard...');
             
+            // Only check localStorage - no MSAL interaction
+            const authData = localStorage.getItem('smartfactory_auth');
+            
+            if (!authData) {
+                console.log('❌ No auth data found, redirecting to login...');
+                window.location.href = '/smart-factory-dashboard/login.html';
+                return;
+            }
+            
             try {
-                // Check localStorage first (set by login.html)
-                const authData = localStorage.getItem('smartfactory_auth');
-                let account = null;
+                const auth = JSON.parse(authData);
+                const loginTime = new Date(auth.loginTime);
+                const now = new Date();
                 
-                if (authData) {
-                    const auth = JSON.parse(authData);
-                    if (auth.authenticated && auth.user.endsWith('@microsoft.com')) {
-                        // Update UI with user info from localStorage
-                        document.getElementById('user-name').textContent = auth.user;
-                        console.log('✅ Using cached authentication:', auth.user);
-                        
-                        // Initialize 3D Factory
-                        window.factory3D = new SmartFactory3D();
-                        console.log('🎉 Dashboard initialized successfully!');
-                        return;
-                    }
-                }
-                
-                // Fallback: check MSAL accounts
-                await myMSALObj.handleRedirectPromise();
-                const currentAccounts = myMSALObj.getAllAccounts();
-                console.log('Current accounts:', currentAccounts);
-                
-                if (currentAccounts.length === 0) {
-                    console.log('❌ No authenticated user found, redirecting to login...');
+                // Check if auth is valid and recent (24 hours)
+                if (!auth.authenticated || !auth.user || !auth.user.endsWith('@microsoft.com')) {
+                    console.log('❌ Invalid auth data, redirecting to login...');
+                    localStorage.removeItem('smartfactory_auth');
                     window.location.href = '/smart-factory-dashboard/login.html';
                     return;
                 }
                 
-                account = currentAccounts[0];
-                console.log('✅ Authenticated user:', account);
-                
-                // Validate @microsoft.com domain
-                if (!account.username.endsWith('@microsoft.com')) {
-                    alert('❌ Acceso denegado. Solo usuarios @microsoft.com pueden acceder.');
-                    logout();
+                // Check if token is expired (24 hours)
+                if (now - loginTime > 24 * 60 * 60 * 1000) {
+                    console.log('⏰ Auth expired, redirecting to login...');
+                    localStorage.removeItem('smartfactory_auth');
+                    window.location.href = '/smart-factory-dashboard/login.html';
                     return;
                 }
                 
-                // Update UI with user info
-                document.getElementById('user-name').textContent = account.username;
+                // Valid auth found - proceed with dashboard
+                console.log('✅ Valid authentication found:', auth.user);
+                document.getElementById('user-name').textContent = auth.user;
                 
                 // Initialize 3D Factory
                 window.factory3D = new SmartFactory3D();
-                
                 console.log('🎉 Dashboard initialized successfully!');
                 
             } catch (error) {
-                console.error('❌ Authentication error:', error);
+                console.error('❌ Error parsing auth data:', error);
+                localStorage.removeItem('smartfactory_auth');
                 window.location.href = '/smart-factory-dashboard/login.html';
             }
         });
 
-        // 🚪 Logout function
+        // 🚪 Logout function - Simplified
         function logout() {
             console.log('🚪 Logging out...');
             localStorage.removeItem('smartfactory_auth');
-            myMSALObj.logoutRedirect({
-                postLogoutRedirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
-            });
+            window.location.href = '/smart-factory-dashboard/logout.html';
         }
 
         // 🔄 Handle window resize
