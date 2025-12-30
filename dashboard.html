@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory 3D - Dashboard</title>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
+    
+    <!-- Microsoft Authentication Library (MSAL) -->
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: white;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 2px solid #00ff88;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px 16px;
+            border-radius: 25px;
+            border: 1px solid #00ff88;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff3742;
+            transform: translateY(-2px);
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .controls-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+            z-index: 500;
+            min-width: 250px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        .machine-item {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .machine-item:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateX(5px);
+        }
+
+        .machine-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .machine-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .status-running { color: #00ff88; }
+        .status-maintenance { color: #ffa502; }
+        .status-offline { color: #ff4757; }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 255, 136, 0.3);
+            border-top: 5px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .alert-panel {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(255, 71, 87, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff4757;
+            z-index: 500;
+            max-width: 300px;
+            display: none;
+        }
+
+        .machine-info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+            z-index: 500;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .controls-panel {
+                top: 100px;
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+            }
+
+            .machine-info-panel {
+                bottom: 20px;
+                left: 10px;
+                right: 10px;
+            }
+
+            .header {
+                padding: 0 15px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .user-info {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔄 Loading Screen -->
+    <div id="loading">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #00ff88; font-size: 18px;">🏭 Cargando Smart Factory 3D...</p>
+        </div>
+    </div>
+
+    <!-- 📱 Header -->
+    <header class="header">
+        <div class="logo">
+            <span style="margin-right: 10px;">🏭</span>
+            Smart Factory 3D Dashboard
+        </div>
+        <div class="user-info">
+            <span id="user-name" class="user-name">Loading...</span>
+            <button id="logout-btn" class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- 🎮 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- 🎛️ Controls Panel -->
+    <div class="controls-panel">
+        <div class="panel-title">🎛️ Control de Máquinas</div>
+        <div id="machine-list">
+            <!-- Machines will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- ⚠️ Alert Panel -->
+    <div id="alert-panel" class="alert-panel">
+        <strong>⚠️ Alerta del Sistema</strong>
+        <p id="alert-message"></p>
+    </div>
+
+    <!-- 📊 Machine Info Panel -->
+    <div id="machine-info-panel" class="machine-info-panel">
+        <h3 id="machine-info-title">📊 Información de Máquina</h3>
+        <div id="machine-info-content"></div>
+    </div>
+
+    <script>
+        // 🔐 Microsoft Authentication Library Configuration
+        const msalConfig = {
+            auth: {
+                clientId: "982a060b-6968-4038-860c-68925782906d",
+                authority: "https://login.microsoftonline.com/fdpo.onmicrosoft.com",
+                redirectUri: "https://artmej.github.io/smart-factory-dashboard/dashboard.html"
+            },
+            cache: {
+                cacheLocation: "sessionStorage",
+                storeAuthStateInCookie: false,
+            }
+        };
+
+        const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+        // 🚀 Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🏭 Initializing Smart Factory 3D Dashboard...');
+            
+            try {
+                // Handle redirect result from login
+                const tokenResponse = await myMSALObj.handleRedirectPromise();
+                console.log('Token response:', tokenResponse);
+                
+                // Get current account
+                const currentAccounts = myMSALObj.getAllAccounts();
+                console.log('Current accounts:', currentAccounts);
+                
+                if (currentAccounts.length === 0) {
+                    console.log('❌ No authenticated user found, redirecting to login...');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const account = currentAccounts[0];
+                console.log('✅ Authenticated user:', account);
+                
+                // Validate @microsoft.com domain
+                if (!account.username.endsWith('@microsoft.com')) {
+                    alert('❌ Acceso denegado. Solo usuarios @microsoft.com pueden acceder.');
+                    logout();
+                    return;
+                }
+                
+                // Update UI with user info
+                document.getElementById('user-name').textContent = account.username;
+                
+                // Initialize 3D Factory
+                window.factory3D = new SmartFactory3D();
+                
+                console.log('🎉 Dashboard initialized successfully!');
+                
+            } catch (error) {
+                console.error('❌ Authentication error:', error);
+                window.location.href = '/login.html';
+            }
+        });
+
+        // 🚪 Logout function
+        function logout() {
+            console.log('🚪 Logging out...');
+            myMSALObj.logoutRedirect({
+                postLogoutRedirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
+            });
+        }
+
+        // 🔄 Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.factory3D && window.factory3D.handleWindowResize) {
+                window.factory3D.handleWindowResize();
+            }
+        });
+
+        // 📱 Mobile menu toggle
+        function toggleMobileMenu() {
+            const controlsPanel = document.querySelector('.controls-panel');
+            controlsPanel.classList.toggle('mobile-hidden');
+        }
+
+        // 🎯 Machine selection handler
+        function selectMachine(machineId) {
+            if (window.factory3D && window.factory3D.selectMachine) {
+                window.factory3D.selectMachine(machineId);
+            }
+        }
+
+        // 📊 Update machine status in UI
+        function updateMachineStatus(machineId, status, data) {
+            const machineElement = document.getElementById(`machine-${machineId}`);
+            if (machineElement) {
+                const statusElement = machineElement.querySelector('.machine-status');
+                const indicatorElement = machineElement.querySelector('.status-indicator');
+                
+                statusElement.textContent = `Estado: ${status}`;
+                statusElement.className = `machine-status status-${status.toLowerCase()}`;
+                
+                if (indicatorElement) {
+                    indicatorElement.className = `status-indicator status-${status.toLowerCase()}`;
+                }
+            }
+        }
+
+        // 🚨 Show alert
+        function showAlert(message) {
+            const alertPanel = document.getElementById('alert-panel');
+            const alertMessage = document.getElementById('alert-message');
+            
+            alertMessage.textContent = message;
+            alertPanel.style.display = 'block';
+            
+            setTimeout(() => {
+                alertPanel.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+
+    <!-- 🏭 Factory 3D Engine -->
+    <script src="factory-3d.js"></script>
+</body>
+</html>

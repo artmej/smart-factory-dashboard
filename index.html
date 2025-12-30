@@ -1,260 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🏭 Smart Factory Mobile</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="application-name" content="Smart Factory">
-    <meta name="description" content="Smart Factory Case Study #36 - Mobile Dashboard">
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Smart Factory">
-    
-    <!-- Simple Manifest Inline -->
-    <link rel="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIlNtYXJ0IEZhY3RvcnkgTW9iaWxlIiwKICAic2hvcnRfbmFtZSI6ICJTbWFydEZhY3RvcnkiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzY2N2VlYSIsCiAgInRoZW1lX2NvbG9yIjogIiM2NjdlZWEiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyclIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3QgZmlsbD0nJTIzNjY3ZWVhJyB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzIwJy8lM0UlM0N0ZXh0IHg9JzUwJyB5PSc2MCcgZm9udC1mYW1pbHk9J0FyaWFsJyBmb250LXNpemU9JzQwJyBmaWxsPSd3aGl0ZScgdGV4dC1hbmNob3I9J21pZGRsZSclM0UlRjAlOUYlOEYlQUQlM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory 3D - Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/login.html">
+    <script>
+        // JavaScript redirect as backup
+        window.location.href = '/login.html';
+    </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0078d4, #005a9e);
             color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            touch-action: manipulation;
+            margin: 0;
         }
-        .header {
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .header h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        .header p { opacity: 0.8; font-size: 0.9rem; }
-        .container { padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 15px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-        .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.15); }
-        .card h3 { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .metric { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; }
-        .value { font-weight: bold; color: #90EE90; }
-        .status { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; }
-        .status.good { background: #28a745; }
-        .status.warning { background: #ffc107; color: #000; }
-        .status.critical { background: #dc3545; }
-        .btn {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin: 10px 0;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            touch-action: manipulation;
-        }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(40,167,69,0.3); }
-        .btn:active { transform: scale(0.95); }
-        .ml-models { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .model {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
+        .loading {
             text-align: center;
         }
-        .accuracy { font-size: 2rem; font-weight: bold; color: #90EE90; }
-        .install-banner {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        .install-banner.show { transform: translateY(0); }
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; }
-            .header h1 { font-size: 1.2rem; }
-            .container { padding: 15px; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🏭 Smart Factory Mobile</h1>
-        <p>Case Study #36 - Real-time Dashboard</p>
+    <div class="loading">
+        <div class="spinner"></div>
+        <h2>🏭 Smart Factory 3D</h2>
+        <p>Redirecting to login...</p>
+        <p><a href="/login.html" style="color: white;">Click here if not redirected automatically</a></p>
     </div>
-
-    <div class="container">
-        <div class="grid">
-            <!-- Factory Status -->
-            <div class="card">
-                <h3>🏭 Factory Status</h3>
-                <div class="metric">
-                    <span>Overall Efficiency</span>
-                    <span class="value" id="efficiency">94.2%</span>
-                </div>
-                <div class="metric">
-                    <span>Production Rate</span>
-                    <span class="value" id="production">1,247 units/hr</span>
-                </div>
-                <div class="metric">
-                    <span>Quality Score</span>
-                    <span class="value" id="quality">99.1%</span>
-                </div>
-                <div class="metric">
-                    <span>Status</span>
-                    <span class="status good" id="status">OPERATIONAL</span>
-                </div>
-            </div>
-
-            <!-- ML Models -->
-            <div class="card">
-                <h3>🤖 ML Models</h3>
-                <div class="ml-models">
-                    <div class="model">
-                        <div>Anomaly Detection</div>
-                        <div class="accuracy" id="anomaly-acc">92.3%</div>
-                    </div>
-                    <div class="model">
-                        <div>Predictive Maintenance</div>
-                        <div class="accuracy" id="maintenance-acc">89.7%</div>
-                    </div>
-                    <div class="model">
-                        <div>Quality Prediction</div>
-                        <div class="accuracy" id="quality-acc">95.1%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card">
-                <h3>⚡ Quick Actions</h3>
-                <button class="btn" onclick="triggerAlert()">🚨 Emergency Stop</button>
-                <button class="btn" onclick="viewFullDashboard()">📊 Full Dashboard</button>
-                <button class="btn" onclick="generateReport()">📋 Generate Report</button>
-                <button class="btn" onclick="callMaintenance()">🔧 Call Maintenance</button>
-            </div>
-
-            <!-- ROI Metrics -->
-            <div class="card">
-                <h3>💰 ROI Metrics</h3>
-                <div class="metric">
-                    <span>Annual Savings</span>
-                    <span class="value">$2.2M</span>
-                </div>
-                <div class="metric">
-                    <span>Downtime Reduction</span>
-                    <span class="value">67%</span>
-                </div>
-                <div class="metric">
-                    <span>Efficiency Gain</span>
-                    <span class="value">23%</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Install Banner -->
-    <div class="install-banner" id="installBanner">
-        <div>📱 Install Smart Factory App for better experience</div>
-        <button onclick="installApp()" style="background: white; color: #28a745; border: none; padding: 10px 20px; border-radius: 15px; margin-top: 10px; font-weight: bold;">Install Now</button>
-    </div>
-
-    <script>
-        // Real-time data simulation
-        function updateData() {
-            // Efficiency
-            const efficiency = document.getElementById('efficiency');
-            efficiency.textContent = (93 + Math.random() * 3).toFixed(1) + '%';
-            
-            // Production
-            const production = document.getElementById('production');
-            production.textContent = (1200 + Math.random() * 100).toFixed(0) + ' units/hr';
-            
-            // Quality
-            const quality = document.getElementById('quality');
-            quality.textContent = (98.5 + Math.random() * 1).toFixed(1) + '%';
-            
-            // ML Models
-            document.getElementById('anomaly-acc').textContent = (91 + Math.random() * 3).toFixed(1) + '%';
-            document.getElementById('maintenance-acc').textContent = (88 + Math.random() * 4).toFixed(1) + '%';
-            document.getElementById('quality-acc').textContent = (94 + Math.random() * 2).toFixed(1) + '%';
-        }
-
-        // Quick Actions
-        function triggerAlert() {
-            alert('🚨 EMERGENCY STOP ACTIVATED!\n\n• All machines stopped\n• Safety protocol engaged\n• Maintenance team notified');
-        }
-
-        function viewFullDashboard() {
-            window.open('https://artmej.github.io/smart-factory-dashboard/', '_blank');
-        }
-
-        function generateReport() {
-            alert('📋 Production Report Generated!\n\n✅ Efficiency: 94.2%\n✅ Quality: 99.1%\n✅ Uptime: 97.8%\n💰 ROI: $2.2M annually');
-        }
-
-        function callMaintenance() {
-            alert('🔧 Maintenance Team Contacted!\n\n• Ticket #SF-2024-1221 created\n• Priority: Medium\n• ETA: 15 minutes\n• Technician: John Smith');
-        }
-
-        // PWA Install
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installBanner').classList.add('show');
-        });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installBanner').classList.remove('show');
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                // Fallback for iOS
-                alert('📱 Para instalar en iOS:\n\n1. Toca el botón compartir\n2. Selecciona "Añadir a pantalla de inicio"\n3. Confirma la instalación');
-            }
-        }
-
-        // Initialize
-        updateData();
-        setInterval(updateData, 3000); // Update every 3 seconds
-
-        // Show install banner after 5 seconds if not installed
-        setTimeout(() => {
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('installBanner').classList.add('show');
-            }
-        }, 5000);
-
-        console.log('🏭 Smart Factory Mobile App Loaded');
-        console.log('📱 Optimized for mobile devices');
-        console.log('⚡ Real-time data updates every 3 seconds');
-    </script>
 </body>
 </html>

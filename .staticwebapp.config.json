@@ -1,6 +1,21 @@
 {
   "routes": [
     {
+      "route": "/login.html",
+      "serve": "/login.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/dashboard.html", 
+      "serve": "/dashboard.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/factory-3d.js",
+      "serve": "/factory-3d.js",
+      "statusCode": 200
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200

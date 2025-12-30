@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Factory 3D - Microsoft Entra ID</title>
+    
+    <!-- MSAL.js Library -->
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0078d4, #005a9e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ms-logo {
+            font-size: 20px;
+            color: #0078d4;
+            margin: 0 auto 20px;
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+        
+        .sign-in-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sign-in-btn:hover {
+            background: #106ebe;
+        }
+        
+        .sign-in-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #dff6dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #0078d4;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .factory-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .factory-info h3 {
+            color: #0078d4;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .factory-info p {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="ms-logo">Microsoft</div>
+        
+        <div class="factory-info">
+            <h3>🏭 Smart Factory 3D</h3>
+            <p>Digital Twins Dashboard for Microsoft users</p>
+            <small style="color: #888; display: block; margin-top: 5px;">
+                Azure Static Web App deployment
+            </small>
+        </div>
+        
+        <h1>Sign in</h1>
+        <p class="subtitle">to continue to Smart Factory</p>
+        
+        <button id="signInBtn" class="sign-in-btn">
+            Sign in with Microsoft
+        </button>
+        
+        <div id="status" class="status info" style="display: none;">
+            Initializing Microsoft authentication...
+        </div>
+    </div>
+
+    <script>
+        // MSAL Configuration for Azure Static Web Apps
+        const msalConfig = {
+            auth: {
+                clientId: '982a060b-6968-4038-860c-68925782906d',
+                authority: 'https://login.microsoftonline.com/fdpo.onmicrosoft.com',
+                redirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
+            },
+            cache: {
+                cacheLocation: 'localStorage',
+                storeAuthStateInCookie: false
+            }
+        };
+
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+        
+        const loginRequest = {
+            scopes: ['User.Read'],
+            domainHint: 'microsoft.com',
+            prompt: 'select_account'
+        };
+
+        const signInBtn = document.getElementById('signInBtn');
+        const status = document.getElementById('status');
+
+        function showStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        async function signIn() {
+            try {
+                signInBtn.disabled = true;
+                signInBtn.innerHTML = 'Signing in... <div class="loading"></div>';
+                showStatus('Redirecting to Microsoft login...', 'info');
+
+                await msalInstance.loginRedirect(loginRequest);
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                signInBtn.disabled = false;
+                signInBtn.textContent = 'Sign in with Microsoft';
+                
+                let errorMessage = 'Authentication failed';
+                if (error.message.includes('@microsoft.com')) {
+                    errorMessage = 'Only @microsoft.com accounts are allowed';
+                } else if (error.errorCode === 'user_cancelled') {
+                    errorMessage = 'Sign-in was cancelled';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showStatus(errorMessage, 'error');
+                setTimeout(hideStatus, 5000);
+            }
+        }
+
+        // Handle redirect response
+        async function handleRedirectResponse() {
+            try {
+                const response = await msalInstance.handleRedirectPromise();
+                
+                if (response && response.account) {
+                    const email = response.account.username;
+                    const tenantId = response.account.tenantId;
+                    
+                    console.log('Login successful:', { email, tenantId });
+                    
+                    // Verificar que el usuario es de microsoft.com
+                    if (!email.endsWith('@microsoft.com')) {
+                        throw new Error('Only @microsoft.com accounts are allowed');
+                    }
+                    
+                    showStatus(`Welcome ${response.account.name}!`, 'success');
+                    
+                    // Store authentication
+                    localStorage.setItem('smartfactory_auth', JSON.stringify({
+                        authenticated: true,
+                        user: email,
+                        name: response.account.name,
+                        tenantId: tenantId,
+                        tenant: 'microsoft.com',
+                        loginTime: new Date().toISOString(),
+                        accessToken: response.accessToken
+                    }));
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Redirect handling failed:', error);
+                showStatus('Authentication failed: ' + error.message, 'error');
+            }
+        }
+
+        // Check if already authenticated
+        async function checkAuthStatus() {
+            const authData = localStorage.getItem('smartfactory_auth');
+            if (authData) {
+                try {
+                    const auth = JSON.parse(authData);
+                    const loginTime = new Date(auth.loginTime);
+                    const now = new Date();
+                    
+                    // Check if token is less than 24 hours old
+                    if (now - loginTime < 24 * 60 * 60 * 1000) {
+                        showStatus(`Welcome back ${auth.name}!`, 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                        return;
+                    }
+                } catch (e) {
+                    localStorage.removeItem('smartfactory_auth');
+                }
+            }
+            
+            // Initialize MSAL
+            await msalInstance.initialize();
+            
+            // Handle redirect response first
+            await handleRedirectResponse();
+            
+            // Add event listener for sign in button
+            signInBtn.addEventListener('click', signIn);
+        }
+
+        // Initialize
+        checkAuthStatus();
+        
+        // Clear any previous auth errors for testing
+        localStorage.removeItem('msal.error');
+    </script>
+</body>
+</html>
