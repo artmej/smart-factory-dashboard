@@ -163,12 +163,60 @@ class SmartFactory3D {
     
     // 🎮 Setup Controls
     setupControls() {
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
-        this.controls.maxPolarAngle = Math.PI / 2;
-        this.controls.minDistance = 5;
-        this.controls.maxDistance = 30;
+        try {
+            if (typeof THREE.OrbitControls !== 'undefined') {
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.maxPolarAngle = Math.PI / 2;
+                this.controls.minDistance = 5;
+                this.controls.maxDistance = 30;
+                console.log('✅ OrbitControls initialized successfully');
+            } else {
+                console.warn('⚠️ OrbitControls not available, using basic camera');
+                // Basic mouse controls as fallback
+                this.setupBasicControls();
+            }
+        } catch (error) {
+            console.error('❌ Error setting up controls:', error);
+            console.warn('⚠️ Falling back to basic camera controls');
+            this.setupBasicControls();
+        }
+    }
+    
+    // 🎮 Basic Controls Fallback
+    setupBasicControls() {
+        let isMouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        
+        this.renderer.domElement.addEventListener('mousedown', (event) => {
+            isMouseDown = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        });
+        
+        this.renderer.domElement.addEventListener('mousemove', (event) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            // Basic camera rotation
+            this.camera.position.x = this.camera.position.x * Math.cos(deltaX * 0.01) - this.camera.position.z * Math.sin(deltaX * 0.01);
+            this.camera.position.z = this.camera.position.x * Math.sin(deltaX * 0.01) + this.camera.position.z * Math.cos(deltaX * 0.01);
+            this.camera.position.y += deltaY * 0.05;
+            
+            this.camera.lookAt(0, 0, 0);
+            
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        });
+        
+        this.renderer.domElement.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+        
+        console.log('✅ Basic camera controls initialized');
     }
     
     // 🏭 Create Demo Factory Layout
@@ -504,8 +552,12 @@ class SmartFactory3D {
             
             if (progress <= 1) {
                 this.camera.position.lerpVectors(startPosition, targetPosition, progress);
-                this.controls.target.lerpVectors(startTarget, targetLookAt, progress);
-                this.controls.update();
+                if (this.controls && this.controls.target) {
+                    this.controls.target.lerpVectors(startTarget, targetLookAt, progress);
+                    this.controls.update();
+                } else {
+                    this.camera.lookAt(targetLookAt.x, targetLookAt.y, targetLookAt.z);
+                }
                 
                 requestAnimationFrame(animateCamera);
             }
@@ -572,7 +624,9 @@ class SmartFactory3D {
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
         
-        this.controls.update();
+        if (this.controls && this.controls.update) {
+            this.controls.update();
+        }
         this.renderer.render(this.scene, this.camera);
         
         // Update machine animations
