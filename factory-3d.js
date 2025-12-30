@@ -219,39 +219,188 @@ class SmartFactory3D {
         console.log('✅ Basic camera controls initialized');
     }
     
-    // 🏭 Create Demo Factory Layout
+    // 🏭 Create Demo Factory Layout with Production Lines
     createDemoLayout() {
-        console.log('🔧 Creating demo factory layout...');
+        console.log('🔧 Creating realistic production lines...');
         
-        // Production Line A
-        this.createMachine('MACHINE_A1', 'Stamping Press A1', -8, 0, -6, 'running', 0x00ff88);
-        this.createMachine('MACHINE_A2', 'Welding Station A2', -3, 0, -6, 'running', 0x00ff88);
-        this.createMachine('MACHINE_A3', 'Assembly Unit A3', 2, 0, -6, 'maintenance', 0xffa502);
-        this.createMachine('MACHINE_A4', 'Quality Check A4', 7, 0, -6, 'running', 0x00ff88);
+        // Production Line A - Automotive Parts
+        this.createProductionLine('A', 'Automotive Parts', [
+            { id: 'MACHINE_A1', name: 'Stamping Press A1', type: 'stamping', status: 'running' },
+            { id: 'MACHINE_A2', name: 'Welding Station A2', type: 'welding', status: 'running' },
+            { id: 'MACHINE_A3', name: 'Assembly Unit A3', type: 'assembly', status: 'maintenance' },
+            { id: 'MACHINE_A4', name: 'Quality Check A4', type: 'quality', status: 'stopped' }
+        ], -6, 'red');
         
-        // Production Line B
-        this.createMachine('MACHINE_B1', 'CNC Mill B1', -8, 0, 0, 'running', 0x00ff88);
-        this.createMachine('MACHINE_B2', 'Lathe B2', -3, 0, 0, 'offline', 0xff4757);
-        this.createMachine('MACHINE_B3', 'Drill Press B3', 2, 0, 0, 'running', 0x00ff88);
-        this.createMachine('MACHINE_B4', 'Grinding Unit B4', 7, 0, 0, 'maintenance', 0xffa502);
+        // Production Line B - Electronics
+        this.createProductionLine('B', 'Electronics', [
+            { id: 'MACHINE_B1', name: 'CNC Mill B1', type: 'cnc', status: 'running' },
+            { id: 'MACHINE_B2', name: 'Lathe B2', type: 'lathe', status: 'offline' },
+            { id: 'MACHINE_B3', name: 'Drill Press B3', type: 'drill', status: 'stopped' },
+            { id: 'MACHINE_B4', name: 'Grinding Unit B4', type: 'grinding', status: 'stopped' }
+        ], 0, 'orange');
         
-        // Production Line C
-        this.createMachine('MACHINE_C1', 'Injection Molder C1', -8, 0, 6, 'running', 0x00ff88);
-        this.createMachine('MACHINE_C2', 'Cooling Station C2', -3, 0, 6, 'running', 0x00ff88);
-        this.createMachine('MACHINE_C3', 'Trimming Unit C3', 2, 0, 6, 'running', 0x00ff88);
-        this.createMachine('MACHINE_C4', 'Packaging Line C4', 7, 0, 6, 'running', 0x00ff88);
+        // Production Line C - Consumer Goods
+        this.createProductionLine('C', 'Consumer Goods', [
+            { id: 'MACHINE_C1', name: 'Injection Molder C1', type: 'molding', status: 'running' },
+            { id: 'MACHINE_C2', name: 'Cooling Station C2', type: 'cooling', status: 'running' },
+            { id: 'MACHINE_C3', name: 'Trimming Unit C3', type: 'trimming', status: 'running' },
+            { id: 'MACHINE_C4', name: 'Packaging Line C4', type: 'packaging', status: 'running' }
+        ], 6, 'green');
         
-        // Conveyor belts
-        this.createConveyorBelts();
+        // Enhanced conveyor system
+        this.createEnhancedConveyorSystem();
         
         // Update machine list UI
         this.updateMachineListUI();
         
-        console.log(`✅ Created ${Object.keys(this.machines).length} machines`);
+        console.log(`✅ Created 3 production lines with ${Object.keys(this.machines).length} machines`);
     }
     
-    // ⚙️ Create Machine
-    createMachine(id, name, x, y, z, status = 'running', color = 0x00ff88) {
+    // 🏭 Create Production Line
+    createProductionLine(lineId, lineName, machinesConfig, zPosition, lineColor) {
+        console.log(`🔧 Creating ${lineName} (Line ${lineId})...`);
+        
+        // Calculate line status based on machines
+        const lineStatus = this.calculateLineStatus(machinesConfig);
+        
+        // Create line header
+        this.createLineHeader(lineId, lineName, lineStatus, zPosition);
+        
+        // Create machines in line
+        machinesConfig.forEach((config, index) => {
+            const xPosition = -8 + (index * 5);
+            const machineStatus = lineStatus === 'stopped' ? 'stopped' : config.status;
+            const color = this.getMachineColor(machineStatus);
+            
+            this.createMachine(
+                config.id, 
+                config.name, 
+                xPosition, 
+                0, 
+                zPosition, 
+                machineStatus, 
+                color,
+                config.type,
+                lineId
+            );
+        });
+        
+        // Create line-specific conveyor
+        this.createLineConveyor(lineId, zPosition, lineColor, lineStatus);
+        
+        // Store line info
+        this.productionLines = this.productionLines || {};
+        this.productionLines[lineId] = {
+            id: lineId,
+            name: lineName,
+            status: lineStatus,
+            machines: machinesConfig.map(m => m.id),
+            color: lineColor,
+            position: zPosition
+        };
+    }
+    
+    // 📊 Calculate Line Status (Business Logic)
+    calculateLineStatus(machinesConfig) {
+        const statuses = machinesConfig.map(m => m.status);
+        
+        // Business rule: If any machine is offline/maintenance, entire line stops
+        if (statuses.includes('offline') || statuses.includes('maintenance')) {
+            return 'stopped';
+        }
+        
+        // If all running, line is running
+        if (statuses.every(s => s === 'running')) {
+            return 'running';
+        }
+        
+        // Mixed states = line issues
+        return 'warning';
+    }
+    
+    // 🎨 Get Machine Color Based on Status
+    getMachineColor(status) {
+        const colors = {
+            'running': 0x00ff88,     // Green
+            'maintenance': 0xffa502, // Orange  
+            'offline': 0xff4757,     // Red
+            'stopped': 0x666666      // Gray (stopped due to line)
+        };
+        return colors[status] || 0x888888;
+    }
+    
+    // 🏷️ Create Line Header
+    createLineHeader(lineId, lineName, lineStatus, zPosition) {
+        // Line status indicator
+        const statusGeometry = new THREE.BoxGeometry(12, 0.3, 0.5);
+        const statusColor = lineStatus === 'running' ? 0x00ff88 : 
+                           lineStatus === 'warning' ? 0xffa502 : 0xff4757;
+        const statusMaterial = new THREE.MeshStandardMaterial({
+            color: statusColor,
+            emissive: statusColor,
+            emissiveIntensity: 0.3
+        });
+        const statusIndicator = new THREE.Mesh(statusGeometry, statusMaterial);
+        statusIndicator.position.set(0, 2.5, zPosition);
+        this.scene.add(statusIndicator);
+        
+        // Line nameplate
+        this.createLineNameplate(`${lineName} - ${lineStatus.toUpperCase()}`, 0, 3, zPosition, statusColor);
+    }
+    
+    // 🏷️ Create Line Nameplate
+    createLineNameplate(text, x, y, z, color) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 128;
+        
+        context.fillStyle = '#000000';
+        context.fillRect(0, 0, 512, 128);
+        context.font = 'Bold 24px Arial';
+        context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        context.textAlign = 'center';
+        context.fillText(text, 256, 80);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
+        });
+        
+        const geometry = new THREE.PlaneGeometry(4, 1);
+        const nameplate = new THREE.Mesh(geometry, material);
+        nameplate.position.set(x, y, z);
+        this.scene.add(nameplate);
+    }
+    
+    // 🚚 Create Line Conveyor
+    createLineConveyor(lineId, zPosition, lineColor, lineStatus) {
+        const beltMaterial = new THREE.MeshStandardMaterial({
+            color: lineStatus === 'running' ? 0x654321 : 0x333333,
+            metalness: 0.1,
+            roughness: 0.9
+        });
+        
+        // Main conveyor belt
+        for (let segment = 0; segment < 5; segment++) {
+            const x = -10 + segment * 5;
+            const beltGeometry = new THREE.BoxGeometry(4, 0.15, 1.2);
+            const belt = new THREE.Mesh(beltGeometry, beltMaterial);
+            belt.position.set(x, -0.4, zPosition);
+            belt.receiveShadow = true;
+            this.scene.add(belt);
+            
+            // Moving material simulation (only if line is running)
+            if (lineStatus === 'running') {
+                this.animateConveyor(belt, segment * 0.5);
+            }
+        }
+        
+        // Line connection pipes/cables
+        this.createLineConnections(zPosition, lineColor);
+    }
+    createMachine(id, name, x, y, z, status = 'running', color = 0x00ff88, type = 'generic', lineId = '') {
         const group = new THREE.Group();
         
         // Main machine body
@@ -662,6 +811,117 @@ class SmartFactory3D {
         
         console.log('🧹 Smart Factory 3D cleaned up');
     }
+    
+    // 🚚 Create Line Connections
+    createLineConnections(zPosition, lineColor) {
+        // Overhead power/data cables
+        const cableGeometry = new THREE.CylinderGeometry(0.05, 0.05, 15, 8);
+        const cableMaterial = new THREE.MeshStandardMaterial({
+            color: 0x444444,
+            metalness: 0.8,
+            roughness: 0.2
+        });
+        
+        const cable = new THREE.Mesh(cableGeometry, cableMaterial);
+        cable.rotation.z = Math.PI / 2;
+        cable.position.set(0, 4, zPosition);
+        this.scene.add(cable);
+    }
+    
+    // 🔄 Animate Conveyor Belt
+    animateConveyor(belt, offset) {
+        let time = offset;
+        const animate = () => {
+            time += 0.02;
+            belt.material.map && (belt.material.map.offset.x = time * 0.1);
+            setTimeout(() => animate(), 100);
+        };
+        animate();
+    }
+    
+    // 🚚 Create Enhanced Conveyor System
+    createEnhancedConveyorSystem() {
+        // Main distribution conveyor (horizontal)
+        const mainConveyorGeometry = new THREE.BoxGeometry(20, 0.2, 0.8);
+        const mainConveyorMaterial = new THREE.MeshStandardMaterial({
+            color: 0x444444,
+            metalness: 0.3,
+            roughness: 0.7
+        });
+        
+        for (let line = 0; line < 3; line++) {
+            const z = (line - 1) * 6;
+            const mainConveyor = new THREE.Mesh(mainConveyorGeometry, mainConveyorMaterial);
+            mainConveyor.position.set(0, -0.3, z);
+            mainConveyor.receiveShadow = true;
+            this.scene.add(mainConveyor);
+        }
+    }
+    
+    // 🔮 Predictive Analytics (Business Intelligence)
+    calculatePredictiveMaintenance(machineId) {
+        const machine = this.machines[machineId];
+        if (!machine) return null;
+        
+        // Simulate predictive algorithm based on multiple factors
+        const factors = {
+            temperature: machine.temperature,
+            vibration: machine.vibration,
+            efficiency: machine.efficiency,
+            runTime: Date.now() - new Date(machine.lastMaintenance).getTime(),
+            historicalPattern: Math.random() * 0.3 + 0.7 // Simulated ML score
+        };
+        
+        // Calculate risk score (0-1)
+        const tempRisk = Math.max(0, (factors.temperature - 75) / 25); // Risk above 75°C
+        const vibrationRisk = factors.vibration / 10; // Normalize to 0-1
+        const efficiencyRisk = Math.max(0, (85 - factors.efficiency) / 20); // Risk below 85%
+        const timeRisk = Math.min(1, factors.runTime / (30 * 24 * 60 * 60 * 1000)); // Days since maintenance
+        
+        const overallRisk = (tempRisk + vibrationRisk + efficiencyRisk + timeRisk) / 4;
+        
+        // Predict maintenance window
+        const daysToMaintenance = Math.max(0, 14 - (overallRisk * 14)); // 0-14 days
+        const maintenanceDate = new Date(Date.now() + daysToMaintenance * 24 * 60 * 60 * 1000);
+        
+        return {
+            riskScore: overallRisk,
+            daysToMaintenance: Math.round(daysToMaintenance),
+            predictedMaintenanceDate: maintenanceDate,
+            factors: factors,
+            recommendation: this.getMaintenanceRecommendation(overallRisk, daysToMaintenance)
+        };
+    }
+    
+    // 💡 Get Maintenance Recommendation
+    getMaintenanceRecommendation(riskScore, daysToMaintenance) {
+        if (riskScore > 0.8) {
+            return {
+                priority: 'CRITICAL',
+                action: '🚨 Programar técnico inmediatamente',
+                color: '#ff4757'
+            };
+        } else if (riskScore > 0.6) {
+            return {
+                priority: 'HIGH',
+                action: '⚠️ Programar técnico en 24-48 horas',
+                color: '#ffa502'
+            };
+        } else if (daysToMaintenance <= 2) {
+            return {
+                priority: 'MEDIUM',
+                action: '📅 Programar técnico esta semana',
+                color: '#3742fa'
+            };
+        } else {
+            return {
+                priority: 'LOW',
+                action: '✅ Funcionamiento normal',
+                color: '#00ff88'
+            };
+        }
+    }
+}
 }
 
 // 🌟 Export for global use
